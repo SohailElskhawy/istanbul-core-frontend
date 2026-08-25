@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ShopExplorer - Dynamic Product Explorer</title>
+    <link rel="stylesheet" href="/src/style.css" />
+  </head>
+  <body>
+    <!-- 1. Responsive Header -->
+    <header class="app-header">
+      <div class="header-brand">
+        <span class="logo-icon">🛍️</span>
+        <h1 class="brand-title">ShopExplorer</h1>
+      </div>
+
+      <nav class="header-nav" aria-label="Main Navigation">
+        <ul class="nav-links">
+          <li><a href="#products" class="nav-link active">Products</a></li>
+          <li><a href="#categories" class="nav-link">Categories</a></li>
+          <li><a href="#about" class="nav-link">About</a></li>
+        </ul>
+      </nav>
+
+      <div class="header-search">
+        <label for="search-input" class="sr-only">Search products</label>
+        <input
+          type="search"
+          id="search-input"
+          class="search-input"
+          placeholder="Search products by name..."
+          autocomplete="off"
+        />
+        <button id="search-clear-btn" class="search-clear-btn" aria-label="Clear search" hidden>&times;</button>
+      </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-container">
+      <!-- Controls & Filter Section -->
+      <section class="controls-section" id="categories" aria-label="Product Filters">
+        <div class="filter-controls-wrap">
+          <div class="filter-group">
+            <label for="category-select" class="filter-label">Category:</label>
+            <select id="category-select" class="category-select">
+              <option value="all">All Categories</option>
+            </select>
+          </div>
+
+          <div class="filter-group">
+            <label for="sort-select" class="filter-label">Sort By:</label>
+            <select id="sort-select" class="category-select">
+              <option value="default">Default</option>
+              <option value="price-asc">Price: Low to High</option>
+              <option value="price-desc">Price: High to Low</option>
+              <option value="rating-desc">Rating: Highest First</option>
+              <option value="title-asc">Name: A to Z</option>
+            </select>
+          </div>
+
+          <button id="favorites-toggle-btn" class="btn-favorites-toggle" type="button" aria-pressed="false">
+            ❤️ Favorites (<span id="favorites-count">0</span>)
+          </button>
+        </div>
+
+        <div class="results-count" id="results-count" aria-live="polite">
+          <!-- Populated by TS -->
+        </div>
+      </section>
+
+      <!-- Status Messages Area (Loading, Error, Empty) -->
+      <div id="status-container" class="status-container" role="status" aria-live="polite">
+        <!-- "Loading products..." or error message will be inserted here -->
+      </div>
+
+      <!-- 2. Product Section Grid -->
+      <section class="products-section" id="products" aria-label="Product Catalog">
+        <div id="product-grid" class="product-grid">
+          <!-- Dynamic product cards will be inserted here -->
+        </div>
+
+        <!-- Pagination Controls (Bonus Feature) -->
+        <nav id="pagination-container" class="pagination-container" aria-label="Pagination Navigation"></nav>
+      </section>
+    </main>
+
+    <!-- 6. Product Details Modal -->
+    <dialog id="product-modal" class="product-modal" aria-labelledby="modal-title">
+      <div class="modal-wrapper">
+        <button id="modal-close-btn" class="modal-close-btn" aria-label="Close details dialog">&times;</button>
+        <div id="modal-content" class="modal-content">
+          <!-- Product detailed info inserted dynamically -->
+        </div>
+      </div>
+    </dialog>
+
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
+
