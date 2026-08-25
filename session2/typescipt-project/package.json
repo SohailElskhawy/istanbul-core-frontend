@@ -1,0 +1,13 @@
+{
+  "name": "typescript-random-table",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "TypeScript HTML project displaying random products and users",
+  "scripts": {
+    "build": "tsc",
+    "watch": "tsc --watch"
+  },
+  "devDependencies": {
+    "typescript": "^5.4.5"
+  }
+}
