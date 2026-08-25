@@ -318,6 +318,7 @@ function closeProductModal(): void {
 function setupEventListeners(): void {
   // Search input and clear button
   searchInput.addEventListener('input', handleSearchInput);
+  searchInput.addEventListener('search', handleSearchInput);
   searchClearBtn.addEventListener('click', handleSearchClear);
 
   // Category filter
