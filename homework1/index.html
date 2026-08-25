@@ -8,13 +8,13 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <a href="#main-content">Skip to main content</a>
+    <a class="skip-link" href="#main-content">Skip to main content</a>
 
     <header>
-        <nav aria-label="Primary navigation">
-            <a href="#home" aria-label="FitFlow home">FitFlow</a>
+        <nav class="primary-nav" aria-label="Primary navigation">
+            <a class="brand" href="#home" aria-label="FitFlow home">FitFlow</a>
 
-            <ul>
+            <ul class="primary-nav__links">
                 <li><a href="#home">Home</a></li>
                 <li><a href="#programs">Programs</a></li>
                 <li><a href="#trainers">Trainers</a></li>
@@ -22,7 +22,7 @@
                 <li><a href="#contact">Contact</a></li>
             </ul>
 
-            <a href="#get-started">Get Started</a>
+            <a class="button primary-nav__cta" href="#get-started">Get Started</a>
         </nav>
     </header>
 
@@ -31,11 +31,11 @@
             <div>
                 <h1>Build a Stronger, Healthier You</h1>
                 <p>Personalized workouts, expert guidance, and simple tools to help you stay consistent and reach your fitness goals.</p>
-                <a href="#programs">Start Your Journey</a>
+                <a class="button" href="#programs">Start Your Journey</a>
             </div>
 
             <figure>
-                <img src="assets/fitflow-hero.jpg" alt="Athlete exercising with guidance from a personal trainer">
+                <img src="assets/fitflow-hero.jpg" alt="Athlete deadlifting a barbell in a gym" width="1200" height="800" decoding="async" fetchpriority="high">
             </figure>
         </section>
 
@@ -44,22 +44,22 @@
 
             <ul>
                 <li>
-                    <article>
-                        <img src="assets/personalized-workouts.jpg" alt="Male athlete performing a controlled strength exercise">
+                    <article class="card feature-card">
+                        <img src="assets/personalized-workouts.jpg" alt="Athlete performing a controlled strength exercise" width="1200" height="1172" loading="lazy" decoding="async">
                         <h3>Personalized Workouts</h3>
                         <p>Workouts designed around your goals and fitness level.</p>
                     </article>
                 </li>
                 <li>
-                    <article>
-                        <img src="assets/expert-trainers.jpg" alt="Male fitness trainer preparing for a gym workout">
+                    <article class="card feature-card">
+                        <img src="assets/expert-trainers.jpg" alt="Athlete resting on a bench in a gym" width="1200" height="1507" loading="lazy" decoding="async">
                         <h3>Expert Trainers</h3>
                         <p>Learn from experienced trainers and follow structured programs.</p>
                     </article>
                 </li>
                 <li>
-                    <article>
-                        <img src="assets/progress-tracking.jpg" alt="Man preparing for a home workout with a fitness mat">
+                    <article class="card feature-card">
+                        <img src="assets/progress-tracking.jpg" alt="Athlete setting up a mat for a home workout" width="1200" height="800" loading="lazy" decoding="async">
                         <h3>Track Your Progress</h3>
                         <p>Monitor your progress and stay motivated over time.</p>
                     </article>
@@ -73,57 +73,57 @@
 
             <ul>
                 <li>
-                    <article>
-                        <img src="assets/strength-training.jpg" alt="Rows of kettlebells in a gym">
+                    <article class="card program-card">
+                        <img src="assets/strength-training.jpg" alt="Rows of kettlebells in a gym" width="1200" height="800" loading="lazy" decoding="async">
                         <h3>Strength Training</h3>
                         <p>Build strength and confidence with guided resistance workouts.</p>
-                        <p><span>Difficulty:</span> Intermediate</p>
-                        <a href="#get-started">Join Now</a>
+                        <p class="program-card__difficulty"><span>Difficulty:</span> Intermediate</p>
+                        <a class="button program-card__action" href="#get-started">Join Strength Training</a>
                     </article>
                 </li>
                 <li>
-                    <article>
-                        <img src="assets/cardio.jpg" alt="Runner completing an outdoor cardio workout">
+                    <article class="card program-card">
+                        <img src="assets/cardio.jpg" alt="Athlete performing mountain climbers indoors" width="1200" height="801" loading="lazy" decoding="async">
                         <h3>Cardio</h3>
                         <p>Improve your endurance and cardiovascular fitness.</p>
-                        <p><span>Difficulty:</span> Beginner</p>
-                        <a href="#get-started">Join Now</a>
+                        <p class="program-card__difficulty"><span>Difficulty:</span> Beginner</p>
+                        <a class="button program-card__action" href="#get-started">Join Cardio</a>
                     </article>
                 </li>
                 <li>
-                    <article>
-                        <img src="assets/yoga.jpg" alt="Man practicing yoga on a mat">
+                    <article class="card program-card">
+                        <img src="assets/yoga.jpg" alt="Athlete practicing yoga on a mat" width="1200" height="960" loading="lazy" decoding="async">
                         <h3>Yoga</h3>
                         <p>Develop balance, flexibility, and mindful movement.</p>
-                        <p><span>Difficulty:</span> Beginner</p>
-                        <a href="#get-started">Join Now</a>
+                        <p class="program-card__difficulty"><span>Difficulty:</span> Beginner</p>
+                        <a class="button program-card__action" href="#get-started">Join Yoga</a>
                     </article>
                 </li>
                 <li>
-                    <article>
-                        <img src="assets/hiit.jpg" alt="Man performing an intense battle-rope workout in a gym">
+                    <article class="card program-card">
+                        <img src="assets/hiit.jpg" alt="Athlete performing a battle-rope workout in a gym" width="1200" height="1800" loading="lazy" decoding="async">
                         <h3>HIIT</h3>
                         <p>Challenge your whole body with short, intense workouts.</p>
-                        <p><span>Difficulty:</span> Advanced</p>
-                        <a href="#get-started">Join Now</a>
+                        <p class="program-card__difficulty"><span>Difficulty:</span> Advanced</p>
+                        <a class="button program-card__action" href="#get-started">Join HIIT</a>
                     </article>
                 </li>
                 <li>
-                    <article>
-                        <img src="assets/mobility.jpg" alt="Athlete performing a guided mobility stretch">
+                    <article class="card program-card">
+                        <img src="assets/mobility.jpg" alt="Athlete stretching on a mat" width="1200" height="1800" loading="lazy" decoding="async">
                         <h3>Mobility</h3>
                         <p>Move more comfortably with controlled mobility sessions.</p>
-                        <p><span>Difficulty:</span> Beginner</p>
-                        <a href="#get-started">Join Now</a>
+                        <p class="program-card__difficulty"><span>Difficulty:</span> Beginner</p>
+                        <a class="button program-card__action" href="#get-started">Join Mobility</a>
                     </article>
                 </li>
                 <li>
-                    <article>
-                        <img src="assets/full-body-workout.jpg" alt="Male athlete demonstrating a full-body strength workout">
+                    <article class="card program-card">
+                        <img src="assets/full-body-workout.jpg" alt="Athlete performing a full-body strength exercise" width="1200" height="1172" loading="lazy" decoding="async">
                         <h3>Full Body Workout</h3>
                         <p>Train every major muscle group in one balanced program.</p>
-                        <p><span>Difficulty:</span> Intermediate</p>
-                        <a href="#get-started">Join Now</a>
+                        <p class="program-card__difficulty"><span>Difficulty:</span> Intermediate</p>
+                        <a class="button program-card__action" href="#get-started">Join Full Body Workout</a>
                     </article>
                 </li>
             </ul>
@@ -142,7 +142,7 @@
         <section id="get-started" aria-labelledby="get-started-title">
             <h2 id="get-started-title">Ready to Start Your Fitness Journey?</h2>
             <p>Join FitFlow today and take the first step toward a stronger, healthier you.</p>
-            <a href="#contact">Get Started</a>
+            <a class="button button--light" href="#contact">Get Started</a>
         </section>
 
         <section id="contact" aria-labelledby="contact-title">
@@ -154,14 +154,14 @@
         </section>
     </main>
 
-    <footer>
-        <div>
-            <a href="#home" aria-label="FitFlow home">FitFlow</a>
-            <p>Personalized fitness guidance to help you build healthy habits and reach your goals.</p>
+    <footer class="site-footer">
+        <div class="footer-intro">
+            <a class="brand brand--footer" href="#home" aria-label="FitFlow home">FitFlow</a>
+            <p class="footer-summary">Personalized fitness guidance to help you build healthy habits and reach your goals.</p>
         </div>
 
         <nav aria-label="Footer navigation">
-            <ul>
+            <ul class="footer-links">
                 <li><a href="#home">Home</a></li>
                 <li><a href="#programs">Programs</a></li>
                 <li><a href="#trainers">Trainers</a></li>
@@ -171,14 +171,14 @@
         </nav>
 
         <nav aria-label="Social media">
-            <ul>
+            <ul class="footer-links">
                 <li><a href="https://www.instagram.com/">Instagram</a></li>
                 <li><a href="https://www.facebook.com/">Facebook</a></li>
                 <li><a href="https://www.youtube.com/">YouTube</a></li>
             </ul>
         </nav>
 
-        <p><small>&copy; 2026 FitFlow. All rights reserved.</small></p>
+        <p class="footer-copyright"><small>&copy; 2026 FitFlow. All rights reserved.</small></p>
     </footer>
 </body>
 </html>

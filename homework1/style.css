@@ -3,8 +3,9 @@
     --color-muted: #5c6b7a;
     --color-surface: #ffffff;
     --color-surface-muted: #eef4f3;
-    --color-accent: #d95f3f;
     --color-accent-dark: #a9412b;
+    --color-action: #a9412b;
+    --color-action-hover: #7f3020;
     --color-accent-soft: #f9e3dc;
     --color-border: #dce5e5;
     --color-focus: #1d7f78;
@@ -43,6 +44,7 @@ body {
 img {
     display: block;
     max-width: 100%;
+    height: auto;
 }
 
 a {
@@ -58,7 +60,7 @@ a:hover {
     color: var(--color-accent-dark);
 }
 
-body > a:first-child {
+.skip-link {
     position: absolute;
     z-index: 10;
     top: var(--space-2);
@@ -71,7 +73,7 @@ body > a:first-child {
     transition: transform 180ms ease;
 }
 
-body > a:first-child:focus {
+.skip-link:focus {
     transform: translateY(0);
 }
 
@@ -80,7 +82,7 @@ header {
     border-bottom: 1px solid var(--color-border);
 }
 
-header nav {
+.primary-nav {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
@@ -90,8 +92,7 @@ header nav {
     padding: var(--space-3) 0;
 }
 
-header nav > a:first-child,
-footer > div > a {
+.brand {
     color: var(--color-accent-dark);
     font-family: var(--font-display);
     font-size: 1.5rem;
@@ -99,8 +100,8 @@ footer > div > a {
     text-decoration: none;
 }
 
-header nav ul,
-footer nav ul {
+.primary-nav__links,
+.footer-links {
     display: flex;
     flex-wrap: wrap;
     gap: var(--space-3);
@@ -109,38 +110,37 @@ footer nav ul {
     list-style: none;
 }
 
-header nav ul a,
-footer nav a {
+.primary-nav__links a,
+.site-footer nav a {
     text-decoration: none;
 }
 
-header nav > a:last-child,
-#home > div > a,
-#get-started > a,
-article > a {
+.primary-nav__links {
+    flex-basis: 100%;
+    order: 3;
+}
+
+.button {
     display: inline-block;
     width: fit-content;
     padding: 0.65rem 1rem;
     color: var(--color-surface);
-    background: var(--color-accent);
-    border: 2px solid var(--color-accent);
+    background: var(--color-action);
+    border: 2px solid var(--color-action);
     border-radius: 999px;
     font-weight: 700;
     text-decoration: none;
     transition: background-color 180ms ease, border-color 180ms ease, transform 180ms ease;
 }
 
-header nav > a:last-child {
+.primary-nav__cta {
     margin-left: auto;
 }
 
-header nav > a:last-child:hover,
-#home > div > a:hover,
-#get-started > a:hover,
-article > a:hover {
+.button:hover {
     color: var(--color-surface);
-    background: var(--color-accent-dark);
-    border-color: var(--color-accent-dark);
+    background: var(--color-action-hover);
+    border-color: var(--color-action-hover);
     transform: translateY(-2px);
 }
 
@@ -212,15 +212,14 @@ p {
 #features ul,
 #programs ul {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 17.5rem), 1fr));
     gap: var(--space-4);
     margin: var(--space-5) 0 0;
     padding: 0;
     list-style: none;
 }
 
-#features article,
-#programs article {
+.card {
     display: flex;
     flex-direction: column;
     height: 100%;
@@ -231,56 +230,50 @@ p {
     box-shadow: var(--shadow-card);
 }
 
-#features article img,
-#programs article img {
+.card img {
     width: 100%;
     aspect-ratio: 16 / 10;
     object-fit: cover;
 }
 
-#features article h3,
-#features article p,
-#programs article h3,
-#programs article p,
-#programs article a {
+.card h3,
+.card p,
+.program-card__action {
     margin-right: var(--space-4);
     margin-left: var(--space-4);
 }
 
-#features article h3,
-#programs article h3 {
+.card h3 {
     margin-top: var(--space-4);
     margin-bottom: var(--space-2);
 }
 
-#features article p,
-#programs article p {
+.card p {
     color: var(--color-muted);
 }
 
-#programs article p + p {
+.program-card .program-card__difficulty {
     margin-top: auto;
     color: var(--color-accent-dark);
     font-size: 0.9rem;
     font-weight: 700;
 }
 
-#programs article p + p span {
+.program-card__difficulty span {
     color: var(--color-muted);
 }
 
-#features article,
-#programs article {
+.program-card {
     transition: transform 180ms ease, box-shadow 180ms ease;
 }
 
-#features article:hover,
-#programs article:hover {
+.program-card:hover,
+.program-card:focus-within {
     transform: translateY(-4px);
     box-shadow: 0 1.25rem 3rem rgb(19 34 56 / 14%);
 }
 
-article > a {
+.program-card__action {
     align-self: flex-start;
     margin-top: var(--space-2);
     margin-bottom: var(--space-4);
@@ -317,13 +310,13 @@ article > a {
     color: #d9e4e4;
 }
 
-#get-started > a {
+.button--light {
     color: var(--color-ink);
     background: var(--color-surface);
     border-color: var(--color-surface);
 }
 
-#get-started > a:hover {
+.button--light:hover {
     color: var(--color-ink);
     background: var(--color-accent-soft);
     border-color: var(--color-accent-soft);
@@ -343,7 +336,7 @@ article > a {
     font-weight: 700;
 }
 
-footer {
+.site-footer {
     display: grid;
     gap: var(--space-5);
     padding: var(--space-6) max(1rem, calc((100% - 72rem) / 2));
@@ -351,25 +344,25 @@ footer {
     background: var(--color-ink);
 }
 
-footer > div > a {
+.brand--footer {
     color: var(--color-surface);
 }
 
-footer > div p {
+.footer-summary {
     max-width: 26rem;
     margin-top: var(--space-2);
     color: #aebfc0;
 }
 
-footer nav a {
+.site-footer nav a {
     color: #d9e4e4;
 }
 
-footer nav a:hover {
+.site-footer nav a:hover {
     color: var(--color-surface);
 }
 
-footer > p {
+.footer-copyright {
     margin: 0;
     padding-top: var(--space-4);
     color: #aebfc0;
@@ -377,8 +370,13 @@ footer > p {
 }
 
 @media (min-width: 48rem) {
-    header nav {
+    .primary-nav {
         gap: var(--space-4);
+    }
+
+    .primary-nav__links {
+        flex-basis: auto;
+        order: 0;
     }
 
     #home {
@@ -386,23 +384,35 @@ footer > p {
         gap: var(--space-7);
     }
 
-    footer {
+    .site-footer {
         grid-template-columns: 1.5fr 1fr 1fr;
         align-items: start;
     }
 
-    footer > p {
+    .footer-copyright {
         grid-column: 1 / -1;
     }
 }
 
 @media (min-width: 64rem) {
-    header nav {
+    .primary-nav {
         padding: var(--space-4) 0;
     }
 
     main > section {
         padding-top: 7rem;
         padding-bottom: 7rem;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    html {
+        scroll-behavior: auto;
+    }
+
+    .skip-link,
+    .button,
+    .program-card {
+        transition: none;
     }
 }
