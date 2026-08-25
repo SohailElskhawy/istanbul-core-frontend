@@ -433,16 +433,37 @@ function restoreFavorites(): void {
 /**
  * Toggles a product in/out of the user's favorites list.
  */
-function toggleFavorite(productId: number): void {
-  if (favoriteIds.has(productId)) {
-    favoriteIds.delete(productId);
-  } else {
+function toggleFavorite(productId: number, btnElement?: HTMLButtonElement): void {
+  const isNowFav = !favoriteIds.has(productId);
+
+  if (isNowFav) {
     favoriteIds.add(productId);
+  } else {
+    favoriteIds.delete(productId);
   }
 
   saveFavorites();
   updateFavoritesCount();
-  applyFilters();
+
+  // If currently filtering by favorites only, re-filter
+  if (showFavoritesOnly) {
+    applyFilters(false);
+  } else if (btnElement) {
+    // Update clicked button in-place instantly
+    btnElement.textContent = isNowFav ? '❤️' : '🤍';
+    const label = isNowFav ? 'Remove from favorites' : 'Add to favorites';
+    btnElement.setAttribute('aria-label', label);
+    btnElement.setAttribute('title', label);
+  } else {
+    // Fallback query for button in DOM
+    const btn = document.querySelector<HTMLButtonElement>(`.btn-favorite[data-fav-id="${productId}"]`);
+    if (btn) {
+      btn.textContent = isNowFav ? '❤️' : '🤍';
+      const label = isNowFav ? 'Remove from favorites' : 'Add to favorites';
+      btn.setAttribute('aria-label', label);
+      btn.setAttribute('title', label);
+    }
+  }
 }
 
 // ============================================================================
@@ -564,9 +585,11 @@ function setupEventListeners(): void {
     // Handle Favorite button click
     const favBtn = target.closest<HTMLButtonElement>('.btn-favorite');
     if (favBtn && favBtn.dataset.favId) {
+      event.preventDefault();
+      event.stopPropagation();
       const favId = parseInt(favBtn.dataset.favId, 10);
       if (!isNaN(favId)) {
-        toggleFavorite(favId);
+        toggleFavorite(favId, favBtn);
       }
       return;
     }
