@@ -11,7 +11,7 @@ These local JPEG assets were downloaded from the Pexels image CDN for the FitFlo
 | `strength-training.jpg` | https://www.pexels.com/photo/416717/ |
 | `cardio.jpg` | https://www.pexels.com/photo/2294361/ |
 | `yoga.jpg` | https://www.pexels.com/photo/8436573/ |
-| `hiit.jpg` | https://www.pexels.com/photo/9171164/ |
+| `hiit.jpg` | https://www.pexels.com/photo/12890810/ |
 | `mobility.jpg` | https://www.pexels.com/photo/4325463/ |
 | `full-body-workout.jpg` | https://www.pexels.com/photo/9171164/ |
 
