@@ -49,9 +49,30 @@ function showLoading(): void {
       <span>Loading products...</span>
     </div>
   `;
-  productGrid.innerHTML = '';
+
+  // Render 8 skeleton cards for visual loading state (Bonus Feature)
+  const skeletonCardsHtml = Array.from({ length: 8 })
+    .map(
+      () => `
+      <div class="skeleton-card" aria-hidden="true">
+        <div class="skeleton-box skeleton-image"></div>
+        <div class="skeleton-body">
+          <div class="skeleton-box skeleton-title"></div>
+          <div class="skeleton-box skeleton-text"></div>
+          <div class="skeleton-box skeleton-text-short"></div>
+          <div class="skeleton-footer">
+            <div class="skeleton-box skeleton-price"></div>
+            <div class="skeleton-box skeleton-button"></div>
+          </div>
+        </div>
+      </div>
+    `
+    )
+    .join('');
+
+  productGrid.innerHTML = skeletonCardsHtml;
   paginationContainer.innerHTML = '';
-  resultsCount.textContent = '';
+  resultsCount.textContent = 'Loading products...';
 }
 
 /**
