@@ -40,11 +40,28 @@
     <main class="main-container">
       <!-- Controls & Filter Section -->
       <section class="controls-section" id="categories" aria-label="Product Filters">
-        <div class="filter-group">
-          <label for="category-select" class="filter-label">Filter by Category:</label>
-          <select id="category-select" class="category-select">
-            <option value="all">All Categories</option>
-          </select>
+        <div class="filter-controls-wrap">
+          <div class="filter-group">
+            <label for="category-select" class="filter-label">Category:</label>
+            <select id="category-select" class="category-select">
+              <option value="all">All Categories</option>
+            </select>
+          </div>
+
+          <div class="filter-group">
+            <label for="sort-select" class="filter-label">Sort By:</label>
+            <select id="sort-select" class="category-select">
+              <option value="default">Default</option>
+              <option value="price-asc">Price: Low to High</option>
+              <option value="price-desc">Price: High to Low</option>
+              <option value="rating-desc">Rating: Highest First</option>
+              <option value="title-asc">Name: A to Z</option>
+            </select>
+          </div>
+
+          <button id="favorites-toggle-btn" class="btn-favorites-toggle" type="button" aria-pressed="false">
+            ❤️ Favorites (<span id="favorites-count">0</span>)
+          </button>
         </div>
 
         <div class="results-count" id="results-count" aria-live="polite">
@@ -62,6 +79,9 @@
         <div id="product-grid" class="product-grid">
           <!-- Dynamic product cards will be inserted here -->
         </div>
+
+        <!-- Pagination Controls (Bonus Feature) -->
+        <nav id="pagination-container" class="pagination-container" aria-label="Pagination Navigation"></nav>
       </section>
     </main>
 

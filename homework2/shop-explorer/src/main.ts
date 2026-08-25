@@ -7,9 +7,15 @@ import { fetchProducts } from './api';
 // ============================================================================
 let allProducts: Product[] = [];
 let currentCategory: string = 'all';
+let currentSort: string = 'default';
 let currentSearchTerm: string = '';
+let showFavoritesOnly: boolean = false;
+let favoriteIds: Set<number> = new Set();
+let currentPage: number = 1;
+const ITEMS_PER_PAGE: number = 12;
 
 const STORAGE_SEARCH_KEY = 'shop_explorer_last_search';
+const STORAGE_FAVORITES_KEY = 'shop_explorer_favorites';
 
 // ============================================================================
 // DOM Elements Selection
@@ -17,9 +23,13 @@ const STORAGE_SEARCH_KEY = 'shop_explorer_last_search';
 const productGrid = document.getElementById('product-grid') as HTMLDivElement;
 const statusContainer = document.getElementById('status-container') as HTMLDivElement;
 const categorySelect = document.getElementById('category-select') as HTMLSelectElement;
+const sortSelect = document.getElementById('sort-select') as HTMLSelectElement;
+const favoritesToggleBtn = document.getElementById('favorites-toggle-btn') as HTMLButtonElement;
+const favoritesCountSpan = document.getElementById('favorites-count') as HTMLSpanElement;
 const searchInput = document.getElementById('search-input') as HTMLInputElement;
 const searchClearBtn = document.getElementById('search-clear-btn') as HTMLButtonElement;
 const resultsCount = document.getElementById('results-count') as HTMLDivElement;
+const paginationContainer = document.getElementById('pagination-container') as HTMLElement;
 
 const productModal = document.getElementById('product-modal') as HTMLDialogElement;
 const modalContent = document.getElementById('modal-content') as HTMLDivElement;
@@ -40,6 +50,7 @@ function showLoading(): void {
     </div>
   `;
   productGrid.innerHTML = '';
+  paginationContainer.innerHTML = '';
   resultsCount.textContent = '';
 }
 
@@ -53,6 +64,7 @@ function showError(message: string = 'Unable to load products. Please try again.
     </div>
   `;
   productGrid.innerHTML = '';
+  paginationContainer.innerHTML = '';
   resultsCount.textContent = '';
 }
 
@@ -71,11 +83,19 @@ function clearStatus(): void {
  * Renders an array of products as cards inside the product grid.
  * Uses map() and template literals.
  */
-function renderProducts(products: Product[]): void {
+function renderProducts(products: Product[], totalMatchingCount: number): void {
   clearStatus();
 
   // Update results counter
-  resultsCount.textContent = `Showing ${products.length} product${products.length === 1 ? '' : 's'}`;
+  if (totalMatchingCount === 0) {
+    resultsCount.textContent = '0 products found';
+  } else if (totalMatchingCount <= ITEMS_PER_PAGE) {
+    resultsCount.textContent = `Showing all ${totalMatchingCount} product${totalMatchingCount === 1 ? '' : 's'}`;
+  } else {
+    const startNum = (currentPage - 1) * ITEMS_PER_PAGE + 1;
+    const endNum = Math.min(currentPage * ITEMS_PER_PAGE, totalMatchingCount);
+    resultsCount.textContent = `Showing ${startNum}–${endNum} of ${totalMatchingCount} products`;
+  }
 
   // Handle empty state if no products match
   if (products.length === 0) {
@@ -85,6 +105,7 @@ function renderProducts(products: Product[]): void {
       </div>
     `;
     productGrid.innerHTML = '';
+    paginationContainer.innerHTML = '';
     return;
   }
 
@@ -92,11 +113,21 @@ function renderProducts(products: Product[]): void {
   const cardsHtml = products
     .map((product) => {
       const { id, title, description, category, price, rating, thumbnail } = product;
+      const isFav = favoriteIds.has(id);
 
       return `
         <article class="product-card" data-id="${id}">
           <div class="card-image-wrap">
             <span class="card-badge">${category}</span>
+            <button 
+              type="button" 
+              class="btn-favorite" 
+              data-fav-id="${id}" 
+              aria-label="${isFav ? 'Remove from favorites' : 'Add to favorites'}"
+              title="${isFav ? 'Remove from favorites' : 'Add to favorites'}"
+            >
+              ${isFav ? '❤️' : '🤍'}
+            </button>
             <img 
               src="${thumbnail}" 
               alt="${title}" 
@@ -152,26 +183,145 @@ function populateCategories(products: Product[]): void {
 }
 
 // ============================================================================
-// Filtering & Search Logic
+// Filtering, Sorting & Pagination Logic
 // ============================================================================
 
 /**
- * Filters the master product list based on current category and search query.
+ * Renders pagination navigation buttons.
  */
-function applyFilters(): void {
+function renderPagination(totalItems: number, totalPages: number): void {
+  if (totalPages <= 1 || totalItems === 0) {
+    paginationContainer.innerHTML = '';
+    return;
+  }
+
+  let paginationHtml = `
+    <button 
+      type="button" 
+      class="btn-page" 
+      data-page="${currentPage - 1}" 
+      ${currentPage === 1 ? 'disabled' : ''}
+      aria-label="Previous page"
+    >
+      « Prev
+    </button>
+  `;
+
+  // Build page numbers with smart clamping
+  const maxButtons = 5;
+  let startPage = 1;
+  let endPage = totalPages;
+
+  if (totalPages > maxButtons) {
+    if (currentPage <= 3) {
+      startPage = 1;
+      endPage = 4;
+    } else if (currentPage + 2 >= totalPages) {
+      startPage = totalPages - 3;
+      endPage = totalPages;
+    } else {
+      startPage = currentPage - 1;
+      endPage = currentPage + 1;
+    }
+  }
+
+  if (startPage > 1) {
+    paginationHtml += `<button type="button" class="btn-page" data-page="1">1</button>`;
+    if (startPage > 2) {
+      paginationHtml += `<span class="pagination-ellipsis">…</span>`;
+    }
+  }
+
+  for (let i = startPage; i <= endPage; i++) {
+    const isActive = i === currentPage;
+    paginationHtml += `
+      <button 
+        type="button" 
+        class="btn-page ${isActive ? 'active' : ''}" 
+        data-page="${i}"
+        ${isActive ? 'aria-current="page"' : ''}
+      >
+        ${i}
+      </button>
+    `;
+  }
+
+  if (endPage < totalPages) {
+    if (endPage < totalPages - 1) {
+      paginationHtml += `<span class="pagination-ellipsis">…</span>`;
+    }
+    paginationHtml += `<button type="button" class="btn-page" data-page="${totalPages}">${totalPages}</button>`;
+  }
+
+  paginationHtml += `
+    <button 
+      type="button" 
+      class="btn-page" 
+      data-page="${currentPage + 1}" 
+      ${currentPage === totalPages ? 'disabled' : ''}
+      aria-label="Next page"
+    >
+      Next »
+    </button>
+  `;
+
+  paginationContainer.innerHTML = paginationHtml;
+}
+
+/**
+ * Filters, sorts, and paginates the master product list.
+ */
+function applyFilters(resetPage: boolean = true): void {
+  if (resetPage) {
+    currentPage = 1;
+  }
+
   const query = currentSearchTerm.trim().toLowerCase();
 
-  const filtered = allProducts.filter((product) => {
+  let filtered = allProducts.filter((product) => {
     const matchesCategory = currentCategory === 'all' || product.category === currentCategory;
     const matchesSearch =
       query === '' ||
       product.title.toLowerCase().includes(query) ||
       product.description.toLowerCase().includes(query);
+    const matchesFavorites = !showFavoritesOnly || favoriteIds.has(product.id);
 
-    return matchesCategory && matchesSearch;
+    return matchesCategory && matchesSearch && matchesFavorites;
   });
 
-  renderProducts(filtered);
+  // Apply Sorting (Bonus Feature)
+  if (currentSort === 'price-asc') {
+    filtered.sort((a, b) => a.price - b.price);
+  } else if (currentSort === 'price-desc') {
+    filtered.sort((a, b) => b.price - a.price);
+  } else if (currentSort === 'rating-desc') {
+    filtered.sort((a, b) => b.rating - a.rating);
+  } else if (currentSort === 'title-asc') {
+    filtered.sort((a, b) => a.title.localeCompare(b.title));
+  }
+
+  // Calculate Pagination (Bonus Feature)
+  const totalItems = filtered.length;
+  const totalPages = Math.ceil(totalItems / ITEMS_PER_PAGE) || 1;
+
+  if (currentPage > totalPages) {
+    currentPage = totalPages;
+  }
+
+  const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+  const paginatedProducts = filtered.slice(startIndex, startIndex + ITEMS_PER_PAGE);
+
+  renderProducts(paginatedProducts, totalItems);
+  renderPagination(totalItems, totalPages);
+}
+
+/**
+ * Handles sort dropdown change.
+ */
+function handleSortChange(e: Event): void {
+  const select = e.target as HTMLSelectElement;
+  currentSort = select.value;
+  applyFilters();
 }
 
 /**
@@ -218,6 +368,59 @@ function handleSearchClear(): void {
 function handleCategoryChange(e: Event): void {
   const select = e.target as HTMLSelectElement;
   currentCategory = select.value;
+  applyFilters();
+}
+
+// ============================================================================
+// Favorites (Bonus Feature)
+// ============================================================================
+
+/**
+ * Updates the favorites count badge.
+ */
+function updateFavoritesCount(): void {
+  favoritesCountSpan.textContent = favoriteIds.size.toString();
+}
+
+/**
+ * Saves current favorite product IDs to localStorage.
+ */
+function saveFavorites(): void {
+  try {
+    localStorage.setItem(STORAGE_FAVORITES_KEY, JSON.stringify([...favoriteIds]));
+  } catch (err) {
+    console.warn('Unable to save favorites to localStorage:', err);
+  }
+}
+
+/**
+ * Restores saved favorites from localStorage.
+ */
+function restoreFavorites(): void {
+  try {
+    const saved = localStorage.getItem(STORAGE_FAVORITES_KEY);
+    if (saved) {
+      const parsed: number[] = JSON.parse(saved);
+      favoriteIds = new Set(parsed);
+    }
+  } catch (err) {
+    console.warn('Unable to load favorites from localStorage:', err);
+  }
+  updateFavoritesCount();
+}
+
+/**
+ * Toggles a product in/out of the user's favorites list.
+ */
+function toggleFavorite(productId: number): void {
+  if (favoriteIds.has(productId)) {
+    favoriteIds.delete(productId);
+  } else {
+    favoriteIds.add(productId);
+  }
+
+  saveFavorites();
+  updateFavoritesCount();
   applyFilters();
 }
 
@@ -321,18 +524,53 @@ function setupEventListeners(): void {
   searchInput.addEventListener('search', handleSearchInput);
   searchClearBtn.addEventListener('click', handleSearchClear);
 
-  // Category filter
+  // Category and Sort filters
   categorySelect.addEventListener('change', handleCategoryChange);
+  sortSelect.addEventListener('change', handleSortChange);
 
-  // Event Delegation for "View Details" buttons inside product grid
+  // Favorites toggle filter
+  favoritesToggleBtn.addEventListener('click', () => {
+    showFavoritesOnly = !showFavoritesOnly;
+    favoritesToggleBtn.classList.toggle('active', showFavoritesOnly);
+    favoritesToggleBtn.setAttribute('aria-pressed', showFavoritesOnly ? 'true' : 'false');
+    applyFilters();
+  });
+
+  // Event Delegation for "View Details" and "Favorite" buttons inside product grid
   productGrid.addEventListener('click', (event: MouseEvent) => {
     const target = event.target as HTMLElement;
-    const detailsBtn = target.closest<HTMLButtonElement>('.btn-details');
 
+    // Handle Favorite button click
+    const favBtn = target.closest<HTMLButtonElement>('.btn-favorite');
+    if (favBtn && favBtn.dataset.favId) {
+      const favId = parseInt(favBtn.dataset.favId, 10);
+      if (!isNaN(favId)) {
+        toggleFavorite(favId);
+      }
+      return;
+    }
+
+    // Handle View Details button click
+    const detailsBtn = target.closest<HTMLButtonElement>('.btn-details');
     if (detailsBtn && detailsBtn.dataset.id) {
       const productId = parseInt(detailsBtn.dataset.id, 10);
       if (!isNaN(productId)) {
         openProductModal(productId);
+      }
+    }
+  });
+
+  // Event Delegation for Pagination buttons
+  paginationContainer.addEventListener('click', (event: MouseEvent) => {
+    const target = event.target as HTMLElement;
+    const pageBtn = target.closest<HTMLButtonElement>('.btn-page');
+
+    if (pageBtn && pageBtn.dataset.page && !pageBtn.disabled) {
+      const targetPage = parseInt(pageBtn.dataset.page, 10);
+      if (!isNaN(targetPage) && targetPage !== currentPage) {
+        currentPage = targetPage;
+        applyFilters(false);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
       }
     }
   });
@@ -377,6 +615,7 @@ function restoreSavedSearch(): void {
 async function initializeApp(): Promise<void> {
   setupEventListeners();
   restoreSavedSearch();
+  restoreFavorites();
   showLoading();
 
   try {
