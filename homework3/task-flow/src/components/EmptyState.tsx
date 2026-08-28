@@ -1,41 +1,61 @@
-﻿import type { FilterType } from '../types/task';
+﻿import type { FilterType, PriorityFilterType } from '../types/task';
 
 interface EmptyStateProps {
   filter: FilterType;
+  priorityFilter: PriorityFilterType;
   totalTasks: number;
+  hasSearchQuery?: boolean;
 }
 
 export const EmptyState: React.FC<EmptyStateProps> = ({
   filter,
+  priorityFilter,
   totalTasks,
+  hasSearchQuery,
 }) => {
   const getMessage = () => {
     if (totalTasks === 0) {
       return {
-        title: 'No tasks found',
-        description: 'You have no tasks in your list. Add one above to get started!',
+        title: 'No Tasks Found',
+        description: 'Your task list is empty. Add a new task above or click "Reset API" to load sample data!',
         icon: '📝',
+      };
+    }
+
+    if (hasSearchQuery) {
+      return {
+        title: 'No Matching Results',
+        description: 'No tasks match your search keywords. Try clearing the search box.',
+        icon: '🔍',
+      };
+    }
+
+    if (priorityFilter !== 'all') {
+      return {
+        title: `No ${priorityFilter.toUpperCase()} Priority Tasks`,
+        description: `You don't have any ${priorityFilter} priority tasks in this view.`,
+        icon: '🎯',
       };
     }
 
     switch (filter) {
       case 'completed':
         return {
-          title: 'No completed tasks yet',
-          description: 'Mark tasks as completed to see them listed here.',
+          title: 'No Completed Tasks',
+          description: 'Check off tasks as you finish them to see them listed here.',
           icon: '⏳',
         };
       case 'pending':
         return {
-          title: 'No pending tasks!',
-          description: 'Great job! You have completed all of your tasks.',
+          title: 'All Tasks Completed!',
+          description: 'Awesome job! You have cleared all pending items.',
           icon: '🎉',
         };
       default:
         return {
-          title: 'No tasks match your criteria',
-          description: 'Try adding or changing your filters.',
-          icon: '🔍',
+          title: 'No Tasks Match',
+          description: 'Try adjusting your filters.',
+          icon: '⚡',
         };
     }
   };
