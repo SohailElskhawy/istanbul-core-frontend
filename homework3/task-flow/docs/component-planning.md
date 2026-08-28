@@ -1,28 +1,40 @@
-﻿# TaskFlow - Component Planning & Architecture
+# TaskFlow - Component Planning & Architecture
 
 ## AI Prompt (Task 1)
 > **Prompt:** "Analyze this Task Manager interface and suggest a React component hierarchy. Explain each component's responsibility, parent-child relationships, reusable elements, and required props. Do not write the implementation code."
 
 ---
 
-## 1. High-Level Component Hierarchy
+## 1. High-Level Architecture & Component Hierarchy
 
 ```text
-App (Root Component - State Owner)
+App (Root Component - Orchestrator)
 │
-├── Header (Stateless presentation)
+├── Custom Hooks & Services Layer
+│   ├── useTaskManager (State, CRUD, API loading & LocalStorage sync)
+│   ├── useTaskFilters (Status/Priority filtering, search & memoized metrics)
+│   ├── useTheme (Theme state & DOM .dark class sync)
+│   ├── taskApi (DummyJSON API network fetching & response mapping)
+│   ├── storage (Type-safe LocalStorage wrapper with runtime type guards)
+│   ├── dateUtils (Standardized timestamp formatting)
+│   └── taskConfig (Centralized domain constants: PRIORITY_CONFIG, STATUS_FILTERS)
 │
-├── TaskSummary (Metrics & Statistics presentation)
+├── Header (Stateless branding & API reset trigger)
+│   └── ThemeToggle (Light/Dark mode button)
 │
-├── AddTaskForm (Input handling & submission)
+├── TaskSummary (Metrics & statistics presentation cards)
 │
-├── TaskFilters (Filter controls & selection)
+├── AddTaskForm (Input handling, priority selection & validation)
 │
-└── TaskList (Container & list rendering)
+├── TaskFilters (Status filter tabs & priority filter pills)
+│
+└── TaskList (Container & list rendering switcher)
     │
-    ├── TaskItem (Individual task card/row - reusable)
+    ├── TaskSkeleton (Chunky Neobrutalist skeleton placeholder cards)
     │
-    └── EmptyState (Fallback display when no tasks match)
+    ├── TaskItem [React.memo] (Individual task card/row with inline edit & delete)
+    │
+    └── EmptyState (Context-aware fallback when no tasks match)
 ```
 
 ---
@@ -30,51 +42,61 @@ App (Root Component - State Owner)
 ## 2. Component Breakdown & Responsibilities
 
 ### 1. `App` (`src/App.tsx`)
-- **Role:** Root component and single source of truth for global task state.
-- **Parent:** None (Top-level application component).
-- **Children:** `Header`, `TaskSummary`, `AddTaskForm`, `TaskFilters`, `TaskList`.
+- **Role:** Top-level application orchestrator.
 - **Responsibilities:**
-  - Holds and manages the main application states (`tasks`, `filter`, `loading`, `error`).
-  - Fetches initial tasks from `https://dummyjson.com/todos` on initial mount via `useEffect`.
-  - Implements immutable state updater functions:
-    - `handleAddTask(title: string): void`
-    - `handleToggleTask(id: number): void`
-    - `handleDeleteTask(id: number): void`
-    - `handleFilterChange(filter: FilterType): void`
-  - Calculates derived data (total, completed, remaining tasks, and filtered task list).
-  - Passes state and handlers down to child components via props.
+  - Composes `useTaskManager`, `useTaskFilters`, and `useTheme`.
+  - Connects derived state and action handlers to child components.
+  - Keeps presentation code completely decoupled from business logic and I/O.
 - **Props:** None.
 
 ---
 
 ### 2. `Header` (`src/components/Header.tsx`)
-- **Role:** Displays the brand identity and tagline of the application.
+- **Role:** Displays brand identity, tagline, API Reset action, and Theme Switcher.
 - **Parent:** `App`
-- **Children:** None
+- **Children:** `ThemeToggle`
 - **Responsibilities:**
   - Renders application name (`TaskFlow`) and description (`Organize your tasks. Stay productive.`).
-  - Clean, static visual presentation.
+  - Provides a "Reset API" button that wipes local storage and re-fetches sample data from DummyJSON.
 - **Props:**
   ```typescript
   interface HeaderProps {
     title?: string;
     subtitle?: string;
+    theme: ThemeMode;
+    onToggleTheme: () => void;
+    onResetApi: () => void;
   }
   ```
-  *(Props can be optional with default fallback values to make the component reusable across different views).*
 
 ---
 
-### 3. `TaskSummary` (`src/components/TaskSummary.tsx`)
+### 3. `ThemeToggle` (`src/components/ThemeToggle.tsx`)
+- **Role:** Interactive toggle button for switching between Light and Dark themes.
+- **Parent:** `Header`
+- **Children:** None
+- **Responsibilities:**
+  - Displays dynamic sun/moon SVG icons and text label (`Light` / `Dark`).
+  - Provides accessible `aria-label` and `title` attributes.
+- **Props:**
+  ```typescript
+  interface ThemeToggleProps {
+    theme: ThemeMode;
+    onToggle: () => void;
+  }
+  ```
+
+---
+
+### 4. `TaskSummary` (`src/components/TaskSummary.tsx`)
 - **Role:** Displays quick statistics of the current task workload.
 - **Parent:** `App`
 - **Children:** None
 - **Responsibilities:**
-  - Renders 3 statistic cards/badges:
-    - **Total tasks**
-    - **Completed tasks**
-    - **Remaining tasks**
-  - Displays values dynamically passed from the parent.
+  - Renders 3 statistic cards:
+    - **Total Tasks**
+    - **Completed Tasks**
+    - **Remaining Tasks**
 - **Props:**
   ```typescript
   interface TaskSummaryProps {
@@ -86,118 +108,131 @@ App (Root Component - State Owner)
 
 ---
 
-### 4. `AddTaskForm` (`src/components/AddTaskForm.tsx`)
-- **Role:** Captures user input to create and submit a new task.
+### 5. `AddTaskForm` (`src/components/AddTaskForm.tsx`)
+- **Role:** Captures user input to create and submit a new task with a chosen priority.
 - **Parent:** `App`
 - **Children:** None
 - **Responsibilities:**
-  - Manages internal local state for the input field (`title: string`).
-  - Validates that the input is not empty or pure whitespace.
-  - Handles `onSubmit` event, calls parent's `onAddTask(trimmedTitle)` callback, and resets the input field.
+  - Manages internal local state for `title`, `priority`, and `inputError`.
+  - Validates that the input is non-empty after `trim()`.
+  - Emits `onAddTask(trimmedTitle, priority)` and clears the form upon valid submission.
+  - Implements WCAG 2.1 AA accessibility with `.sr-only` labels, `aria-invalid`, and `aria-describedby`.
 - **Props:**
   ```typescript
   interface AddTaskFormProps {
-    onAddTask: (title: string) => void;
+    onAddTask: (title: string, priority: PriorityLevel) => void;
   }
   ```
-- **Local State:**
-  - `title: string` (controlled input value).
 
 ---
 
-### 5. `TaskFilters` (`src/components/TaskFilters.tsx`)
-- **Role:** Provides interactive filter buttons for switching views.
+### 6. `TaskFilters` (`src/components/TaskFilters.tsx`)
+- **Role:** Provides interactive filter buttons for switching views by status and priority.
 - **Parent:** `App`
 - **Children:** None
 - **Responsibilities:**
-  - Renders filter buttons: `All`, `Pending`, `Completed`.
-  - Highlights the currently active filter button with an active style.
-  - Emits filter changes to the parent via `onFilterChange`.
+  - Renders status filter tabs (`All`, `Pending`, `Completed`) with real-time count badges.
+  - Renders priority filter pills (`All Priorities`, `🔴 High`, `🟡 Med`, `🟢 Low`) driven by `PRIORITY_FILTERS`.
+  - Emits filter changes via `onFilterChange` and `onPriorityFilterChange`.
 - **Props:**
   ```typescript
-  export type FilterType = 'all' | 'pending' | 'completed';
-
   interface TaskFiltersProps {
     currentFilter: FilterType;
     onFilterChange: (filter: FilterType) => void;
+    currentPriorityFilter: PriorityFilterType;
+    onPriorityFilterChange: (priority: PriorityFilterType) => void;
+    counts: {
+      all: number;
+      pending: number;
+      completed: number;
+    };
   }
   ```
 
 ---
 
-### 6. `TaskList` (`src/components/TaskList.tsx`)
+### 7. `TaskList` (`src/components/TaskList.tsx`)
 - **Role:** Container for rendering the list of tasks or displaying loading/error/empty feedback.
 - **Parent:** `App`
-- **Children:** `TaskItem`, `EmptyState`
+- **Children:** `TaskItem`, `TaskSkeleton`, `EmptyState`
 - **Responsibilities:**
-  - Handles conditional rendering:
-    - If `loading === true`: renders a loading message/spinner.
-    - If `error !== null`: renders an error message.
-    - If `tasks.length === 0`: renders `<EmptyState />` with a relevant message based on `currentFilter`.
-    - If `tasks.length > 0`: maps over `tasks` and renders `<TaskItem />` for each task using `task.id` as the unique `key`.
+  - If `isLoading === true`: renders `<TaskSkeleton />`.
+  - If `error !== null`: renders an error alert banner with a "Try Again" button.
+  - If `tasks.length === 0`: renders `<EmptyState />`.
+  - If `tasks.length > 0`: maps over `tasks` and renders `<TaskItem />` for each task using `task.id` as the unique `key`.
 - **Props:**
   ```typescript
   interface TaskListProps {
     tasks: Task[];
+    totalTasks: number;
     isLoading: boolean;
     error: string | null;
     currentFilter: FilterType;
+    currentPriorityFilter: PriorityFilterType;
+    hasSearchQuery: boolean;
     onToggleTask: (id: number) => void;
     onDeleteTask: (id: number) => void;
+    onEditTask: (id: number, newTitle: string) => void;
+    onRetry?: () => void;
   }
   ```
 
 ---
 
-### 7. `TaskItem` (`src/components/TaskItem.tsx`)
-- **Role:** Reusable row/card representing a single task item.
+### 8. `TaskItem` (`src/components/TaskItem.tsx`)
+- **Role:** Memoized card representing a single task item.
 - **Parent:** `TaskList`
 - **Children:** None
 - **Responsibilities:**
-  - Displays task title (with completed visual styling like strikethrough / muted color).
-  - Displays status badge (`Completed` / `Pending`).
-  - Provides a completion toggle checkbox/button (`onChange` or `onClick`).
-  - Provides a delete button with a click handler.
+  - Displays task title with completion styling (strikethrough / muted color).
+  - Displays priority badge and formatted creation timestamp (`formatTaskDate`).
+  - Supports inline editing (Save `✓`, Cancel `✕`, `Enter`, `Escape`).
+  - Wrapped in `React.memo` to eliminate cascading re-renders across the list.
 - **Props:**
   ```typescript
   interface TaskItemProps {
     task: Task;
     onToggle: (id: number) => void;
     onDelete: (id: number) => void;
+    onEdit: (id: number, newTitle: string) => void;
   }
   ```
 
 ---
 
-### 8. `EmptyState` (`src/components/EmptyState.tsx`)
-- **Role:** Reusable fallback banner when a list or filtered subset is empty.
-- **Parent:** `TaskList`
-- **Children:** None
-- **Responsibilities:**
-  - Displays context-aware empty feedback (e.g., "No tasks found.", "No completed tasks yet.", "No pending tasks!").
-- **Props:**
-  ```typescript
-  interface EmptyStateProps {
-    filter: FilterType;
-  }
-  ```
+### 9. `TaskSkeleton` (`src/components/TaskSkeleton.tsx`) & `EmptyState` (`src/components/EmptyState.tsx`)
+- **`TaskSkeleton`:** Renders 4 animated Neobrutalist placeholder cards that match real task card geometry during fetch.
+- **`EmptyState`:** Renders context-aware feedback (e.g. "No tasks found", "No completed tasks yet", "No matching search results").
 
 ---
 
 ## 3. TypeScript Data Contracts (`src/types/task.ts`)
 
 ```typescript
+export type PriorityLevel = 'low' | 'medium' | 'high';
+
 export interface Task {
+  id: number;
+  todo: string;
+  completed: boolean;
+  priority: PriorityLevel;
+  createdAt: string;
+  userId?: number;
+}
+
+export type FilterType = 'all' | 'pending' | 'completed';
+export type PriorityFilterType = 'all' | PriorityLevel;
+export type ThemeMode = 'light' | 'dark';
+
+export interface DummyJsonTodo {
   id: number;
   todo: string;
   completed: boolean;
   userId?: number;
 }
 
-export type FilterType = 'all' | 'pending' | 'completed';
-
 export interface DummyJsonTodosResponse {
-  todos: Task[];
+  todos: DummyJsonTodo[];
   total: number;
   skip: number;
   limit: number;
@@ -210,24 +245,17 @@ export interface DummyJsonTodosResponse {
 
 | State | Location | Why It Lives There |
 | :--- | :--- | :--- |
-| `tasks` (`Task[]`) | `App` | Shared between `TaskSummary` (metrics), `AddTaskForm` (adding), and `TaskList` (displaying/toggling/deleting). |
-| `filter` (`FilterType`) | `App` | Controls which tasks `TaskList` displays and which filter button `TaskFilters` highlights. |
-| `loading` (`boolean`) | `App` | Determined by the initial API request in `App`'s `useEffect`, controlling global loading display. |
-| `error` (`string \| null`) | `App` | Captures network/fetch errors during initial load to display error notifications. |
-| `title` (`string`) | `AddTaskForm` | Isolated form input state; no other component needs to know what the user is typing before submission. |
+| `tasks` (`Task[]`) | `useTaskManager` (App) | Shared between `TaskSummary` (metrics), `AddTaskForm` (adding), and `TaskList` (displaying/toggling/deleting). |
+| `filter` (`FilterType`) | `useTaskFilters` (App) | Controls which tasks `TaskList` displays and which filter button `TaskFilters` highlights. |
+| `priorityFilter` (`PriorityFilterType`) | `useTaskFilters` (App) | Controls priority filtering across `TaskList` and `TaskFilters`. |
+| `searchQuery` (`string`) | `useTaskFilters` (App) | Filter criterion shared between search input and `TaskList`. |
+| `theme` (`ThemeMode`) | `useTheme` (App) | Global visual state controlling `.dark` class on `document.documentElement` and `localStorage`. |
+| `isLoading` / `error` | `useTaskManager` (App) | Controls whether `TaskList` renders loading skeletons, error banners, or task cards. |
+| `title`, `priority`, `inputError` | `AddTaskForm` | Isolated form input state; prevents application-wide re-renders during typing. |
+| `isEditing`, `editTitle` | `TaskItem` | Local inline edit state; prevents editing one task from re-rendering sibling tasks. |
 
-### Derived State (Computed on-the-fly, not in `useState`):
-- **`totalCount`**: `tasks.length`
-- **`completedCount`**: `tasks.filter(t => t.completed).length`
-- **`remainingCount`**: `tasks.filter(t => !t.completed).length`
-- **`filteredTasks`**: `tasks.filter(t => ...)` based on `filter` value.
-
----
-
-## 5. Summary Checklist Before Implementation
-- [x] Clear component boundaries defined.
-- [x] Single responsibility principle followed for each component.
-- [x] Props and callback functions clearly typed.
-- [x] State lifting applied properly to avoid prop drilling and unnecessary state duplication.
-- [x] Derived state used instead of redundant state variables.
-- [x] Prompt saved for assignment submission requirements.
+### Derived State (Computed via `useMemo`):
+- **`summary.total`**: `tasks.length`
+- **`summary.completed`**: `tasks.filter(t => t.completed).length`
+- **`summary.remaining`**: `total - completed`
+- **`filteredTasks`**: Filtered array computed based on `filter`, `priorityFilter`, and `searchQuery`.

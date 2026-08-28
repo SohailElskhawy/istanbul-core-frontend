@@ -1,4 +1,4 @@
-﻿# TaskFlow - Implementation Review (Task 2)
+# TaskFlow - Implementation Review (Task 2)
 
 ## AI Prompt (Task 2)
 > **Prompt:** "Review this React + TypeScript Task Manager implementation across the following areas: component responsibilities, props usage, state location, state mutations, repeated code, TypeScript typing, useEffect, list keys, unnecessary re-renders, and maintainability. Identify any potential issues or anti-patterns and explain why they are problems. Do not rewrite the entire application."
@@ -9,33 +9,38 @@
 
 | Dimension | Assessment | Status | Notes |
 | :--- | :--- | :--- | :--- |
-| **Component Responsibilities** | Excellent | ✅ Pass | Each component has a single, well-defined responsibility (`Header` presents, `TaskSummary` computes/shows metrics, `AddTaskForm` handles inputs, `TaskFilters` switches filters, `TaskList` manages layout/state fallbacks, `TaskItem` handles item actions). |
-| **Props Usage & Drilling** | Clean & Shallow | ✅ Pass | Max prop depth is 2 levels (`App` -> `TaskList` -> `TaskItem`). Props contracts are explicit and minimal. |
-| **State Location** | Well-Lifting & Colocated | ✅ Pass | Shared state (`tasks`, `filter`, `loading`, `error`) lives in `App`. Form input text (`title`) is localized inside `AddTaskForm`. |
-| **State Mutations** | Fully Immutable | ✅ Pass | Array modifications strictly use `.filter()` and `.map()`, and object copies use the spread operator (`{ ...task, completed: !task.completed }`). No `Array.prototype.push` or direct property reassignments. |
-| **Repeated Code (DRY)** | Low Redundancy | ✅ Pass | Derived state (`totalTasks`, `completedTasks`, `remainingTasks`, `filteredTasks`) calculated on the fly without duplicating data in multiple states. |
-| **TypeScript Typing** | Strict & Safe | ✅ Pass | Zero usage of `any`. Clean interfaces for models (`Task`, `FilterType`, `DummyJsonTodosResponse`) and all component props. |
-| **useEffect & API Lifecycle** | Correct | ✅ Pass | Initial data fetch runs once on mount with empty/stable dependency (`useCallback`), with error boundary catch blocks preventing crashes. |
-| **List Keys** | Stable & Unique | ✅ Pass | Uses unique `task.id` as the key for list items, never array indices. |
-| **Re-render Optimization** | Optimal for Scale | ✅ Pass | Derived state avoids unnecessary state-synchronization effects. Handler functions use functional state updaters (`prev => ...`). |
-| **Maintainability & Readability**| High | ✅ Pass | Standard folder structure, modern CSS variables, accessible semantic HTML tags (`<header>`, `<main>`, `<section>`, `<nav>`, `<button>`, `<label>`). |
+| **SOLID Architecture** | Excellent | ✅ Pass | Extracted custom hooks (`useTaskManager`, `useTaskFilters`, `useTheme`) to satisfy **SRP**. Centralized config (`taskConfig.ts`) for **OCP**. Decoupled I/O via `taskApi.ts` and `storage.ts` for **DIP**. |
+| **Props Usage & Drilling** | Shallow & Explicit | ✅ Pass | Max prop depth is 2 levels (`App` -> `TaskList` -> `TaskItem`). Props contracts use standard typed object parameters without legacy `React.FC`. |
+| **State Location & Colocation** | Optimal | ✅ Pass | Shared state lives in custom hooks consumed by `App`. Input values (`title`, `priority`) are colocated in `AddTaskForm`, and inline editing (`isEditing`) is colocated in `TaskItem`. |
+| **State Mutations** | Fully Immutable | ✅ Pass | State updates strictly use `.map()`, `.filter()`, and object/array spread (`{ ...task }`, `[newTask, ...prev]`). Zero in-place mutations (`.push()`, `.splice()`). |
+| **DRY & KISS** | High | ✅ Pass | Consolidated API data mapping (`mapDummyJsonTodosToTasks`), standardized date formatting (`formatTaskDate`), and eliminated the infinite loading bug on empty localStorage arrays (`[]`). |
+| **TypeScript Best Practices** | Strict & Safe | ✅ Pass | Zero `any` usage. Safe `localStorage` deserialization with `isTask` / `isTaskArray` runtime type guards. Strongly typed event handlers and models. |
+| **useEffect & Side Effects** | Targeted & Clean | ✅ Pass | `useEffect` is strictly used for asynchronous side effects (API fetch with `AbortController`, storage auto-sync, DOM class toggle). Zero `useEffect` usage for derived state. |
+| **List Keys & Reconciliation** | Stable & Unique | ✅ Pass | Uses unique `task.id` (`Date.now()` for new items, numeric IDs for API items) as keys, never array indices. |
+| **Re-render Optimization** | Highly Optimized | ✅ Pass | [`TaskItem`](file:///C:/Users/sohai/OneDrive/Desktop/work/core-frontend/istanbul-core-frontend/homework3/task-flow/src/components/TaskItem.tsx) is wrapped in `React.memo` with `useCallback` action handlers. Derived calculations (`summary`, `filteredTasks`) use `useMemo`. |
+| **Accessibility (WCAG 2.1 AA)** | Compliant | ✅ Pass | Form controls have `.sr-only` labels. Validation errors are linked via `aria-describedby` and `aria-invalid`. Checkboxes feature high-contrast `:focus-visible` rings. |
+| **CSS Performance** | High Framerate | ✅ Pass | Constrained animations to GPU-composited properties (`transform`, `opacity`, `box-shadow`, `background-color`), avoiding layout reflows from `transition: all`. |
 
 ---
 
 ## 2. Detailed Findings & Engineering Explanations
 
-### Finding 1: Single Source of Truth for Derived Metrics
-- **Analysis:** Notice that `totalTasks`, `completedTasks`, and `remainingTasks` are not stored in separate `useState` variables.
-- **Why this matters:** Storing derived values in state requires synchronizing them with `useEffect` or inside every handler. That creates bugs where counts go out of sync with the actual tasks array. Calculating them directly during render (`tasks.filter(t => t.completed).length`) guarantees 100% consistency with zero lag.
+### Finding 1: SRP Custom Hooks Separation
+- **Analysis:** Business logic is decoupled into `useTaskManager`, `useTaskFilters`, and `useTheme`.
+- **Why this matters:** Eliminates monolithic component bloat. Testing or modifying task persistence, filtering rules, or theme logic can be done in isolation without touching UI presentation.
 
-### Finding 2: Safe Form Submission & Local State Isolation
-- **Analysis:** `title` input state is managed inside `AddTaskForm` rather than `App`.
-- **Why this matters:** If `title` lived in `App`, every keystroke typed by the user would cause the entire application, header, summary cards, and all 30 task items to re-render. Isolating `title` inside `AddTaskForm` keeps typing instant and decoupled.
+### Finding 2: Open/Closed Principle via `PRIORITY_CONFIG`
+- **Analysis:** Priority labels, emojis, and styling classes are declared in [`src/constants/taskConfig.ts`](file:///C:/Users/sohai/OneDrive/Desktop/work/core-frontend/istanbul-core-frontend/homework3/task-flow/src/constants/taskConfig.ts).
+- **Why this matters:** Components consume this configuration dynamically. Adding or changing priority levels does not require refactoring 4 different JSX component files.
 
-### Finding 3: Stable ID Generation for User-Added Tasks
-- **Analysis:** `Date.now()` is used for newly added tasks, while API tasks come with numeric IDs (e.g. 1 to 30).
-- **Why this matters:** Avoids ID collisions between API-loaded tasks and newly user-created tasks, ensuring `key={task.id}` remains strictly unique.
+### Finding 3: Derived State Optimization with `useMemo`
+- **Analysis:** `summary` counters and `filteredTasks` are computed using `useMemo` in `useTaskFilters.ts`.
+- **Why this matters:** Toggling the dark/light theme re-renders `App`, but `useMemo` skips the task filtering and counting loops because `tasks`, `filter`, and `searchQuery` did not change.
 
-### Finding 4: Graceful Error Recovery
-- **Analysis:** When the API fails or is offline, an error alert is rendered along with a "Try Again" button that triggers `fetchTasks()`.
-- **Why this matters:** Follows defensive UI design principles so the app never crashes into a white screen of death.
+### Finding 4: Re-render Isolation with `React.memo` & `useCallback`
+- **Analysis:** [`TaskItem`](file:///C:/Users/sohai/OneDrive/Desktop/work/core-frontend/istanbul-core-frontend/homework3/task-flow/src/components/TaskItem.tsx) is wrapped in `React.memo`, and all callbacks in `useTaskManager` use `useCallback(..., [])`.
+- **Why this matters:** In a list of 30 tasks, checking off Task #2 only re-renders Task #2. The remaining 29 task cards retain their prop references and skip rendering.
+
+### Finding 5: Safe Storage Deserialization with Runtime Type Guards
+- **Analysis:** `storage.getTasks` verifies parsed JSON using the `isTaskArray` type guard before returning it to React state.
+- **Why this matters:** Prevents runtime crashes and undefined property errors if `localStorage` contains corrupted or legacy data.
