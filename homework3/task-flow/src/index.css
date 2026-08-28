@@ -25,6 +25,12 @@
   --color-orange: #fb923c;        /* Neon Orange */
   --color-red: #f87171;           /* Punchy Red */
 
+  /* Status Colors */
+  --color-pending: #facc15;
+  --color-pending-text: #000000;
+  --color-completed: #4ade80;
+  --color-completed-text: #000000;
+
   /* Priority Colors */
   --priority-low-bg: #dcfce7;
   --priority-low-text: #14532d;
@@ -61,15 +67,21 @@
   --text-light: #71717a;
 
   --color-main: #facc15;
-  --color-main-foreground: #000;
+  --color-main-foreground: #000000;
+
+  /* Status Badges in Dark Mode (Vibrant & High Contrast) */
+  --color-pending: #fde047;
+  --color-pending-text: #09090b;
+  --color-completed: #4ade80;
+  --color-completed-text: #09090b;
   
-  /* Priority Colors (Dark) */
-  --priority-low-bg: #064e3b;
-  --priority-low-text: #6ee7b7;
-  --priority-med-bg: #713f12;
-  --priority-med-text: #fde047;
-  --priority-high-bg: #7f1d1d;
-  --priority-high-text: #fca5a5;
+  /* Priority Badges in Dark Mode (Bright & Readable) */
+  --priority-low-bg: #4ade80;
+  --priority-low-text: #09090b;
+  --priority-med-bg: #fde047;
+  --priority-med-text: #09090b;
+  --priority-high-bg: #f87171;
+  --priority-high-text: #09090b;
 
   --grid-color: rgba(255, 255, 255, 0.08);
 }
