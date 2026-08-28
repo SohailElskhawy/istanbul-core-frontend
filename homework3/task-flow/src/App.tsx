@@ -86,7 +86,7 @@ function App() {
               todo: item.todo,
               completed: item.completed,
               priority: priorities[index % 3],
-              createdAt: 'Initial API',
+              createdAt: 'Aug 28, 2026',
               userId: item.userId,
             }));
             setTasks(mappedTasks);
@@ -132,7 +132,7 @@ function App() {
         todo: item.todo,
         completed: item.completed,
         priority: priorities[index % 3],
-        createdAt: 'Initial API',
+        createdAt: 'Aug 28, 2026',
         userId: item.userId,
       }));
 
@@ -148,6 +148,7 @@ function App() {
   // 6. Pure Immutable Action Handlers
   const handleAddTask = (title: string, priority: PriorityLevel) => {
     const now = new Date();
+    const formattedDate = now.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
     const formattedTime = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
     const newTask: Task = {
@@ -155,7 +156,7 @@ function App() {
       todo: title,
       completed: false,
       priority,
-      createdAt: `Today, ${formattedTime}`,
+      createdAt: `${formattedDate}, ${formattedTime}`,
     };
 
     setTasks((prevTasks) => [newTask, ...prevTasks]);
