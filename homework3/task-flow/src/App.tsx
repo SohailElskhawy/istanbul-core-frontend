@@ -1,4 +1,4 @@
-﻿import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import type { Task, FilterType, PriorityFilterType, PriorityLevel, ThemeMode, DummyJsonTodosResponse } from './types/task';
 import { Header } from './components/Header';
 import { TaskSummary } from './components/TaskSummary';
@@ -94,7 +94,7 @@ function App() {
 
   // 4. Auto-save tasks to localStorage whenever tasks change
   useEffect(() => {
-    if (!loading && tasks.length > 0) {
+    if (!loading) {
       localStorage.setItem(STORAGE_TASKS_KEY, JSON.stringify(tasks));
     }
   }, [tasks, loading]);
@@ -105,7 +105,7 @@ function App() {
     fetchTasksFromApi();
   };
 
-  // 6. Immutable Action Handlers
+  // 6. Pure Immutable Action Handlers
   const handleAddTask = (title: string, priority: PriorityLevel) => {
     const now = new Date();
     const formattedTime = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
@@ -114,51 +114,35 @@ function App() {
       id: Date.now(),
       todo: title,
       completed: false,
-      priority: priority,
+      priority,
       createdAt: `Today, ${formattedTime}`,
     };
 
-    setTasks((prevTasks) => {
-      const updated = [newTask, ...prevTasks];
-      localStorage.setItem(STORAGE_TASKS_KEY, JSON.stringify(updated));
-      return updated;
-    });
+    setTasks((prevTasks) => [newTask, ...prevTasks]);
   };
 
   const handleToggleTask = (id: number) => {
-    setTasks((prevTasks) => {
-      const updated = prevTasks.map((task) =>
+    setTasks((prevTasks) =>
+      prevTasks.map((task) =>
         task.id === id ? { ...task, completed: !task.completed } : task
-      );
-      localStorage.setItem(STORAGE_TASKS_KEY, JSON.stringify(updated));
-      return updated;
-    });
+      )
+    );
   };
 
   const handleDeleteTask = (id: number) => {
-    setTasks((prevTasks) => {
-      const updated = prevTasks.filter((task) => task.id !== id);
-      localStorage.setItem(STORAGE_TASKS_KEY, JSON.stringify(updated));
-      return updated;
-    });
+    setTasks((prevTasks) => prevTasks.filter((task) => task.id !== id));
   };
 
   const handleEditTask = (id: number, newTitle: string) => {
-    setTasks((prevTasks) => {
-      const updated = prevTasks.map((task) =>
+    setTasks((prevTasks) =>
+      prevTasks.map((task) =>
         task.id === id ? { ...task, todo: newTitle } : task
-      );
-      localStorage.setItem(STORAGE_TASKS_KEY, JSON.stringify(updated));
-      return updated;
-    });
+      )
+    );
   };
 
   const handleClearCompleted = () => {
-    setTasks((prevTasks) => {
-      const updated = prevTasks.filter((task) => !task.completed);
-      localStorage.setItem(STORAGE_TASKS_KEY, JSON.stringify(updated));
-      return updated;
-    });
+    setTasks((prevTasks) => prevTasks.filter((task) => !task.completed));
   };
 
   // 7. Derived State (Computed on-the-fly)
