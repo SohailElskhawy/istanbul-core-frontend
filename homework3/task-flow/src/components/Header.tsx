@@ -1,4 +1,4 @@
-﻿import type { ThemeMode } from '../types/task';
+import type { ThemeMode } from '../types/task';
 import { ThemeToggle } from './ThemeToggle';
 
 interface HeaderProps {
@@ -9,13 +9,13 @@ interface HeaderProps {
   onResetApi: () => void;
 }
 
-export const Header: React.FC<HeaderProps> = ({
+export function Header({
   title = 'TaskFlow',
   subtitle = 'Organize your tasks. Stay productive.',
   theme,
   onToggleTheme,
   onResetApi,
-}) => {
+}: HeaderProps) {
   return (
     <header className="app-header">
       <div className="header-top-bar">
@@ -30,6 +30,7 @@ export const Header: React.FC<HeaderProps> = ({
             className="neo-btn-sm reset-api-btn"
             onClick={onResetApi}
             title="Reset tasks from DummyJSON API"
+            aria-label="Reset tasks from DummyJSON API"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -61,4 +62,4 @@ export const Header: React.FC<HeaderProps> = ({
       </div>
     </header>
   );
-};
+}

@@ -1,4 +1,4 @@
-﻿:root {
+:root {
   --font-family: 'Public Sans', 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   
   /* Neobrutalism Palette (Light Mode) */
@@ -69,13 +69,13 @@
   --color-main: #facc15;
   --color-main-foreground: #000000;
 
-  /* Status Badges in Dark Mode (Vibrant & High Contrast) */
+  /* Status Badges in Dark Mode */
   --color-pending: #fde047;
   --color-pending-text: #09090b;
   --color-completed: #4ade80;
   --color-completed-text: #09090b;
   
-  /* Priority Badges in Dark Mode (Bright & Readable) */
+  /* Priority Badges in Dark Mode */
   --priority-low-bg: #4ade80;
   --priority-low-text: #09090b;
   --priority-med-bg: #fde047;
@@ -115,4 +115,23 @@ button {
   cursor: pointer;
   border: none;
   background: none;
+}
+
+/* Accessibility: Screen Reader Only Utility */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Focus Visible Accessibility */
+:focus-visible {
+  outline: 3px solid var(--color-main);
+  outline-offset: 2px;
 }

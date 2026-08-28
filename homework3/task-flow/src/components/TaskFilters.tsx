@@ -1,45 +1,33 @@
-﻿import type { FilterType, PriorityFilterType } from '../types/task';
+import type { FilterType, PriorityFilterType } from '../types/task';
+import { STATUS_FILTERS, PRIORITY_FILTERS } from '../constants/taskConfig';
 
 interface TaskFiltersProps {
   currentFilter: FilterType;
   onFilterChange: (filter: FilterType) => void;
   currentPriorityFilter: PriorityFilterType;
   onPriorityFilterChange: (priority: PriorityFilterType) => void;
-  counts?: {
+  counts: {
     all: number;
     pending: number;
     completed: number;
   };
 }
 
-export const TaskFilters: React.FC<TaskFiltersProps> = ({
+export function TaskFilters({
   currentFilter,
   onFilterChange,
   currentPriorityFilter,
   onPriorityFilterChange,
   counts,
-}) => {
-  const statusFilters: { key: FilterType; label: string }[] = [
-    { key: 'all', label: 'All' },
-    { key: 'pending', label: 'Pending' },
-    { key: 'completed', label: 'Completed' },
-  ];
-
-  const priorityFilters: { key: PriorityFilterType; label: string }[] = [
-    { key: 'all', label: 'All Priorities' },
-    { key: 'high', label: '🔴 High' },
-    { key: 'medium', label: '🟡 Med' },
-    { key: 'low', label: '🟢 Low' },
-  ];
-
+}: TaskFiltersProps) {
   return (
     <div className="task-filters-wrapper">
       {/* 1. Status Filter Tabs */}
       <nav className="task-filters" aria-label="Filter tasks by status">
         <div className="filter-button-group" role="tablist">
-          {statusFilters.map(({ key, label }) => {
+          {STATUS_FILTERS.map(({ key, label }) => {
             const isActive = currentFilter === key;
-            const count = counts ? counts[key] : undefined;
+            const count = counts[key];
 
             return (
               <button
@@ -51,9 +39,7 @@ export const TaskFilters: React.FC<TaskFiltersProps> = ({
                 onClick={() => onFilterChange(key)}
               >
                 <span className="filter-label">{label}</span>
-                {count !== undefined && (
-                  <span className="filter-count">{count}</span>
-                )}
+                <span className="filter-count">{count}</span>
               </button>
             );
           })}
@@ -63,7 +49,7 @@ export const TaskFilters: React.FC<TaskFiltersProps> = ({
       {/* 2. Priority Filter Bar */}
       <div className="priority-filter-group" aria-label="Filter by priority">
         <span className="priority-filter-label">Priority:</span>
-        {priorityFilters.map(({ key, label }) => {
+        {PRIORITY_FILTERS.map(({ key, label }) => {
           const isActive = currentPriorityFilter === key;
           return (
             <button
@@ -79,4 +65,4 @@ export const TaskFilters: React.FC<TaskFiltersProps> = ({
       </div>
     </div>
   );
-};
+}

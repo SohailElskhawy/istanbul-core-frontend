@@ -1,14 +1,10 @@
-﻿interface TaskSummaryProps {
+interface TaskSummaryProps {
   total: number;
   completed: number;
   remaining: number;
 }
 
-export const TaskSummary: React.FC<TaskSummaryProps> = ({
-  total,
-  completed,
-  remaining,
-}) => {
+export function TaskSummary({ total, completed, remaining }: TaskSummaryProps) {
   return (
     <section className="task-summary" aria-label="Task Summary Statistics">
       <div className="summary-card total">
@@ -27,4 +23,4 @@ export const TaskSummary: React.FC<TaskSummaryProps> = ({
       </div>
     </section>
   );
-};
+}

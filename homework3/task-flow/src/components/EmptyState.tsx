@@ -1,4 +1,5 @@
-﻿import type { FilterType, PriorityFilterType } from '../types/task';
+import type { FilterType, PriorityFilterType } from '../types/task';
+import { PRIORITY_CONFIG } from '../constants/taskConfig';
 
 interface EmptyStateProps {
   filter: FilterType;
@@ -7,12 +8,12 @@ interface EmptyStateProps {
   hasSearchQuery?: boolean;
 }
 
-export const EmptyState: React.FC<EmptyStateProps> = ({
+export function EmptyState({
   filter,
   priorityFilter,
   totalTasks,
   hasSearchQuery,
-}) => {
+}: EmptyStateProps) {
   const getMessage = () => {
     if (totalTasks === 0) {
       return {
@@ -31,9 +32,10 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
     }
 
     if (priorityFilter !== 'all') {
+      const priorityLabel = PRIORITY_CONFIG[priorityFilter]?.label || priorityFilter;
       return {
-        title: `No ${priorityFilter.toUpperCase()} Priority Tasks`,
-        description: `You don't have any ${priorityFilter} priority tasks in this view.`,
+        title: `No ${priorityLabel} Priority Tasks`,
+        description: `You don't have any ${priorityLabel.toLowerCase()} priority tasks in this view.`,
         icon: '🎯',
       };
     }
@@ -64,9 +66,11 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
 
   return (
     <div className="empty-state" role="status">
-      <div className="empty-state-icon" aria-hidden="true">{message.icon}</div>
+      <div className="empty-state-icon" aria-hidden="true">
+        {message.icon}
+      </div>
       <h3 className="empty-state-title">{message.title}</h3>
       <p className="empty-state-description">{message.description}</p>
     </div>
   );
-};
+}

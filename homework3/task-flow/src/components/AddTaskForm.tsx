@@ -1,11 +1,12 @@
-﻿import React, { useState } from 'react';
+import React, { useState } from 'react';
 import type { PriorityLevel } from '../types/task';
+import { PRIORITY_CONFIG } from '../constants/taskConfig';
 
 interface AddTaskFormProps {
   onAddTask: (title: string, priority: PriorityLevel) => void;
 }
 
-export const AddTaskForm: React.FC<AddTaskFormProps> = ({ onAddTask }) => {
+export function AddTaskForm({ onAddTask }: AddTaskFormProps) {
   const [title, setTitle] = useState('');
   const [priority, setPriority] = useState<PriorityLevel>('medium');
   const [inputError, setInputError] = useState('');
@@ -32,34 +33,58 @@ export const AddTaskForm: React.FC<AddTaskFormProps> = ({ onAddTask }) => {
     }
   };
 
+  const handlePriorityChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const val = e.target.value as PriorityLevel;
+    if (val in PRIORITY_CONFIG) {
+      setPriority(val);
+    }
+  };
+
   return (
     <form className="add-task-form" onSubmit={handleSubmit} noValidate>
       <div className="input-group">
+        <label htmlFor="new-task-input" className="sr-only">
+          Task Title
+        </label>
         <input
+          id="new-task-input"
           type="text"
           className={`task-input ${inputError ? 'input-invalid' : ''}`}
           placeholder="What needs to be done?"
           value={title}
           onChange={handleInputChange}
           aria-label="New task title"
+          aria-invalid={Boolean(inputError)}
+          aria-describedby={inputError ? 'add-task-error' : undefined}
         />
 
+        <label htmlFor="new-task-priority" className="sr-only">
+          Task Priority
+        </label>
         <select
+          id="new-task-priority"
           className="priority-select"
           value={priority}
-          onChange={(e) => setPriority(e.target.value as PriorityLevel)}
+          onChange={handlePriorityChange}
           aria-label="Select task priority"
         >
-          <option value="low">🟢 Low</option>
-          <option value="medium">🟡 Medium</option>
-          <option value="high">🔴 High</option>
+          {(Object.keys(PRIORITY_CONFIG) as PriorityLevel[]).map((level) => (
+            <option key={level} value={level}>
+              {PRIORITY_CONFIG[level].displayText}
+            </option>
+          ))}
         </select>
 
-        <button type="submit" className="add-btn">
-          <span>+</span> Add Task
+        <button type="submit" className="add-btn" aria-label="Add task">
+          <span aria-hidden="true">+</span> Add Task
         </button>
       </div>
-      {inputError && <p className="form-error-message" role="alert">{inputError}</p>}
+
+      {inputError && (
+        <p id="add-task-error" className="form-error-message" role="alert">
+          {inputError}
+        </p>
+      )}
     </form>
   );
-};
+}

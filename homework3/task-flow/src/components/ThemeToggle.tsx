@@ -1,20 +1,22 @@
-﻿import type { ThemeMode } from '../types/task';
+import type { ThemeMode } from '../types/task';
 
 interface ThemeToggleProps {
   theme: ThemeMode;
   onToggle: () => void;
 }
 
-export const ThemeToggle: React.FC<ThemeToggleProps> = ({ theme, onToggle }) => {
+export function ThemeToggle({ theme, onToggle }: ThemeToggleProps) {
+  const isLight = theme === 'light';
+
   return (
     <button
       type="button"
       className="neo-btn-sm theme-toggle-btn"
       onClick={onToggle}
-      aria-label={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
-      title={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
+      aria-label={`Switch to ${isLight ? 'dark' : 'light'} mode`}
+      title={`Switch to ${isLight ? 'dark' : 'light'} mode`}
     >
-      {theme === 'light' ? (
+      {isLight ? (
         <>
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -61,4 +63,4 @@ export const ThemeToggle: React.FC<ThemeToggleProps> = ({ theme, onToggle }) => 
       )}
     </button>
   );
-};
+}

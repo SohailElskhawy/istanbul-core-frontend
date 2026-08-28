@@ -1,4 +1,4 @@
-﻿export type PriorityLevel = 'low' | 'medium' | 'high';
+export type PriorityLevel = 'low' | 'medium' | 'high';
 
 export interface Task {
   id: number;
@@ -13,13 +13,15 @@ export type FilterType = 'all' | 'pending' | 'completed';
 export type PriorityFilterType = 'all' | PriorityLevel;
 export type ThemeMode = 'light' | 'dark';
 
+export interface DummyJsonTodo {
+  id: number;
+  todo: string;
+  completed: boolean;
+  userId?: number;
+}
+
 export interface DummyJsonTodosResponse {
-  todos: Array<{
-    id: number;
-    todo: string;
-    completed: boolean;
-    userId?: number;
-  }>;
+  todos: DummyJsonTodo[];
   total: number;
   skip: number;
   limit: number;

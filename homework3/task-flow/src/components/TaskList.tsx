@@ -1,4 +1,4 @@
-﻿import type { Task, FilterType, PriorityFilterType } from '../types/task';
+import type { Task, FilterType, PriorityFilterType } from '../types/task';
 import { TaskItem } from './TaskItem';
 import { EmptyState } from './EmptyState';
 import { TaskSkeleton } from './TaskSkeleton';
@@ -17,7 +17,7 @@ interface TaskListProps {
   onRetry?: () => void;
 }
 
-export const TaskList: React.FC<TaskListProps> = ({
+export function TaskList({
   tasks,
   totalTasks,
   isLoading,
@@ -29,7 +29,7 @@ export const TaskList: React.FC<TaskListProps> = ({
   onDeleteTask,
   onEditTask,
   onRetry,
-}) => {
+}: TaskListProps) {
   // 1. Loading Skeleton
   if (isLoading) {
     return <TaskSkeleton />;
@@ -76,4 +76,4 @@ export const TaskList: React.FC<TaskListProps> = ({
       ))}
     </ul>
   );
-};
+}
