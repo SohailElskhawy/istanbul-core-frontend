@@ -12,14 +12,42 @@ const STORAGE_TASKS_KEY = 'taskflow_tasks_v2';
 const STORAGE_THEME_KEY = 'taskflow_theme';
 
 function App() {
-  const [tasks, setTasks] = useState<Task[]>([]);
+  // 1. Initial State with Lazy LocalStorage Initializer
+  const [tasks, setTasks] = useState<Task[]>(() => {
+    try {
+      const saved = localStorage.getItem(STORAGE_TASKS_KEY);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          return parsed;
+        }
+      }
+    } catch (e) {
+      console.warn('Could not read tasks from localStorage:', e);
+    }
+    return [];
+  });
+
   const [filter, setFilter] = useState<FilterType>('all');
   const [priorityFilter, setPriorityFilter] = useState<PriorityFilterType>('all');
   const [searchQuery, setSearchQuery] = useState<string>('');
-  const [loading, setLoading] = useState<boolean>(true);
+  const [loading, setLoading] = useState<boolean>(() => {
+    try {
+      const saved = localStorage.getItem(STORAGE_TASKS_KEY);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          return false;
+        }
+      }
+    } catch {
+      // fallback to true
+    }
+    return true;
+  });
   const [error, setError] = useState<string | null>(null);
 
-  // 1. Theme Management (Bonus)
+  // 2. Theme Management (Bonus)
   const [theme, setTheme] = useState<ThemeMode>(() => {
     const saved = localStorage.getItem(STORAGE_THEME_KEY);
     if (saved === 'dark' || saved === 'light') return saved;
@@ -39,20 +67,65 @@ function App() {
     setTheme((prev) => (prev === 'light' ? 'dark' : 'light'));
   };
 
-  // 2. Fetch Initial Tasks from DummyJSON API
-  const fetchTasksFromApi = useCallback(async () => {
+  // 3. Initial Mount: Fetch from API if no tasks are stored in localStorage
+  useEffect(() => {
+    let isMounted = true;
+    const saved = localStorage.getItem(STORAGE_TASKS_KEY);
+
+    if (!saved) {
+      fetch(API_URL)
+        .then((res) => {
+          if (!res.ok) throw new Error(`HTTP ${res.status}`);
+          return res.json();
+        })
+        .then((data: DummyJsonTodosResponse) => {
+          if (isMounted) {
+            const priorities: PriorityLevel[] = ['low', 'medium', 'high'];
+            const mappedTasks: Task[] = (data.todos || []).map((item, index) => ({
+              id: item.id,
+              todo: item.todo,
+              completed: item.completed,
+              priority: priorities[index % 3],
+              createdAt: 'Initial API',
+              userId: item.userId,
+            }));
+            setTasks(mappedTasks);
+            setLoading(false);
+          }
+        })
+        .catch((err) => {
+          if (isMounted) {
+            console.error('Failed to fetch initial tasks:', err);
+            setError('Something went wrong while loading tasks. Please try again.');
+            setLoading(false);
+          }
+        });
+    }
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  // 4. Auto-save tasks to localStorage whenever tasks change
+  useEffect(() => {
+    if (!loading) {
+      localStorage.setItem(STORAGE_TASKS_KEY, JSON.stringify(tasks));
+    }
+  }, [tasks, loading]);
+
+  // 5. Reset API Handler (Triggered on User Click)
+  const handleResetApi = useCallback(async () => {
     setLoading(true);
     setError(null);
+    localStorage.removeItem(STORAGE_TASKS_KEY);
 
     try {
       const response = await fetch(API_URL);
       if (!response.ok) {
         throw new Error(`Server responded with status ${response.status}`);
       }
-
       const data: DummyJsonTodosResponse = await response.json();
-      
-      // Map API todos into our Task schema with priorities and formatted dates
       const priorities: PriorityLevel[] = ['low', 'medium', 'high'];
       const mappedTasks: Task[] = (data.todos || []).map((item, index) => ({
         id: item.id,
@@ -64,46 +137,13 @@ function App() {
       }));
 
       setTasks(mappedTasks);
-      localStorage.setItem(STORAGE_TASKS_KEY, JSON.stringify(mappedTasks));
     } catch (err) {
-      console.error('Failed to fetch tasks:', err);
+      console.error('Failed to reset tasks:', err);
       setError('Something went wrong while loading tasks. Please try again.');
     } finally {
       setLoading(false);
     }
   }, []);
-
-  // 3. Initial Load: Check localStorage or fetch from API
-  useEffect(() => {
-    const savedTasks = localStorage.getItem(STORAGE_TASKS_KEY);
-    if (savedTasks) {
-      try {
-        const parsed = JSON.parse(savedTasks);
-        if (Array.isArray(parsed) && parsed.length > 0) {
-          setTasks(parsed);
-          setLoading(false);
-          return;
-        }
-      } catch (e) {
-        console.warn('Corrupted tasks in localStorage. Reloading from API...', e);
-      }
-    }
-
-    fetchTasksFromApi();
-  }, [fetchTasksFromApi]);
-
-  // 4. Auto-save tasks to localStorage whenever tasks change
-  useEffect(() => {
-    if (!loading) {
-      localStorage.setItem(STORAGE_TASKS_KEY, JSON.stringify(tasks));
-    }
-  }, [tasks, loading]);
-
-  // 5. Reset API Handler
-  const handleResetApi = () => {
-    localStorage.removeItem(STORAGE_TASKS_KEY);
-    fetchTasksFromApi();
-  };
 
   // 6. Pure Immutable Action Handlers
   const handleAddTask = (title: string, priority: PriorityLevel) => {
@@ -278,7 +318,7 @@ function App() {
             onToggleTask={handleToggleTask}
             onDeleteTask={handleDeleteTask}
             onEditTask={handleEditTask}
-            onRetry={fetchTasksFromApi}
+            onRetry={handleResetApi}
           />
         </section>
       </main>
