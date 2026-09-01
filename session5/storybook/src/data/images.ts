@@ -1,0 +1,88 @@
+import type { GalleryImage } from '../types/image';
+
+export const mockImages: GalleryImage[] = [
+  {
+    id: 'img-1',
+    src: 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1200&q=80',
+    alt: 'Serene mountain valley with reflective lake and lush green pines under a clear sky',
+    title: 'Alpine Serenity at Twilight',
+    category: 'nature',
+  },
+  {
+    id: 'img-2',
+    src: 'https://images.unsplash.com/photo-1477959858617-67f30bc75b82?auto=format&fit=crop&w=1200&q=80',
+    alt: 'Vibrant modern city skyline glowing with illumination during late evening dusk',
+    title: 'Metropolitan Horizon Lights',
+    category: 'city',
+  },
+  {
+    id: 'img-3',
+    src: 'https://images.unsplash.com/photo-1546182990-dffeafbe841d?auto=format&fit=crop&w=1200&q=80',
+    alt: 'Majestic male lion resting peacefully in the warm savannah grasslands',
+    title: 'The Golden Lion King',
+    category: 'animals',
+  },
+  {
+    id: 'img-4',
+    src: 'https://images.unsplash.com/photo-1488646953014-85cb44e25828?auto=format&fit=crop&w=1200&q=80',
+    alt: 'Vintage compass resting atop an antique world map alongside a traveler passport',
+    title: 'Wanderlust Navigator',
+    category: 'travel',
+  },
+  {
+    id: 'img-5',
+    src: 'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?auto=format&fit=crop&w=1200&q=80',
+    alt: 'Morning sunlight filtering dramatically through towering beech trees in deep woods',
+    title: 'Emerald Forest Sunbeam',
+    category: 'nature',
+  },
+  {
+    id: 'img-6',
+    src: 'https://images.unsplash.com/photo-1480714378408-67cf0d13bc1b?auto=format&fit=crop&w=1200&q=80',
+    alt: 'Manhattan street scene framed by iconic architectural skyscrapers in afternoon light',
+    title: 'Canyon of Steel and Glass',
+    category: 'city',
+  },
+  {
+    id: 'img-7',
+    src: 'https://images.unsplash.com/photo-1555169062-013468b47731?auto=format&fit=crop&w=1200&q=80',
+    alt: 'Perched vivid green hummingbird hovering delicately near tropical flora',
+    title: 'Emerald Hummingbird in Flight',
+    category: 'animals',
+  },
+  {
+    id: 'img-8',
+    src: 'https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?auto=format&fit=crop&w=1200&q=80',
+    alt: 'Convertible vehicle cruising down an empty desert highway toward distant mesa mountains',
+    title: 'Route Beyond the Horizon',
+    category: 'travel',
+  },
+  {
+    id: 'img-9',
+    src: 'https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?auto=format&fit=crop&w=1200&q=80',
+    alt: 'Dense misty fog covering rugged autumn mountain ridge at dawn',
+    title: 'Misty Ridge Awakening',
+    category: 'nature',
+  },
+  {
+    id: 'img-10',
+    src: 'https://images.unsplash.com/photo-1514565131-fce0801e5785?auto=format&fit=crop&w=1200&q=80',
+    alt: 'Tokyo street drenched in neon reflections during a soft rainy night',
+    title: 'Neon Echoes of Shibuya',
+    category: 'city',
+  },
+  {
+    id: 'img-11',
+    src: 'https://images.unsplash.com/photo-1535268647677-300dbf3d78d1?auto=format&fit=crop&w=1200&q=80',
+    alt: 'Close-up portrait of an adorable playful red kitten with wide curious blue eyes',
+    title: 'Curious Whisker Portrait',
+    category: 'animals',
+  },
+  {
+    id: 'img-12',
+    src: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1200&q=80',
+    alt: 'Pristine turquoise ocean waves lapping against powdery white tropical sand beach',
+    title: 'Azure Lagoon Escape',
+    category: 'travel',
+  },
+];

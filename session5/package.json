@@ -1,0 +1,12 @@
+{
+  "name": "session5-root",
+  "private": true,
+  "scripts": {
+    "dev": "npm --prefix storybook run dev",
+    "build": "npm --prefix storybook run build",
+    "lint": "npm --prefix storybook run lint",
+    "test": "npm --prefix storybook test",
+    "storybook": "npm --prefix storybook run storybook",
+    "build-storybook": "npm --prefix storybook run build-storybook"
+  }
+}

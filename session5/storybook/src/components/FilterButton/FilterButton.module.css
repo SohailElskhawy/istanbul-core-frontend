@@ -1,0 +1,70 @@
+.filterButton {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-4);
+  font-family: var(--font-family-base);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  line-height: var(--line-height-normal);
+  color: var(--color-text-muted);
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-full);
+  transition: all var(--transition-fast);
+  cursor: pointer;
+  user-select: none;
+}
+
+.filterButton:hover:not(:disabled):not(.active) {
+  color: var(--color-text);
+  background-color: var(--color-surface-hover);
+  border-color: var(--color-border-hover);
+}
+
+.filterButton:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+/* Active State: Distinct in color, contrast, font-weight, border and subtle dot */
+.active {
+  color: var(--color-primary);
+  background-color: var(--color-primary-subtle);
+  border-color: var(--color-primary);
+  font-weight: var(--font-weight-semibold);
+  box-shadow: 0 0 0 1px var(--color-primary);
+}
+
+.activeIndicator {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: var(--radius-full);
+  background-color: var(--color-primary);
+}
+
+.countBadge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1px 6px;
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  border-radius: var(--radius-full);
+  background-color: var(--color-border);
+  color: var(--color-text-muted);
+}
+
+.active .countBadge {
+  background-color: var(--color-primary-border);
+  color: var(--color-primary-hover);
+}
+
+.filterButton:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  pointer-events: none;
+}
